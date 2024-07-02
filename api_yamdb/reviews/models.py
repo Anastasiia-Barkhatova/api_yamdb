@@ -58,7 +58,7 @@ class Title(models.Model):
         on_delete=models.CASCADE,
         related_name='categoryes'
     )
-    genres = models.ManyToManyField(Genre)
+    genres = models.ManyToManyField(Genre, related_name='genres')
 
     class Meta:
         verbose_name = 'произведение'
