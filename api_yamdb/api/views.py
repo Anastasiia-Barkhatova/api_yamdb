@@ -1,10 +1,35 @@
-from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
+
+from rest_framework import viewsets, mixins
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from reviews.models import Comment, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 from .serializers import CommentSerializer, ReviewSerializer
+
+
+from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
+
+
+class CategoryViewSet(mixins.CreateModelMixin,
+                      mixins.ListModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class GenreViewSet(mixins.CreateModelMixin,
+                   mixins.ListModelMixin,
+                   mixins.DestroyModelMixin,
+                   viewsets.GenericViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
