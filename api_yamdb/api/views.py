@@ -1,14 +1,13 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import viewsets, mixins
+from rest_framework import mixins, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-
 from reviews.models import Category, Comment, Genre, Review, Title
-from .serializers import CommentSerializer, ReviewSerializer
 
-
-from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, TitleSerializer)
+from .permission import IsAdminOrReadOnly
 
 
 class CategoryViewSet(mixins.CreateModelMixin,
@@ -17,6 +16,7 @@ class CategoryViewSet(mixins.CreateModelMixin,
                       viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class GenreViewSet(mixins.CreateModelMixin,
@@ -25,11 +25,13 @@ class GenreViewSet(mixins.CreateModelMixin,
                    viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -53,7 +55,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PageNumberPagination
 
     def get_title(self):
