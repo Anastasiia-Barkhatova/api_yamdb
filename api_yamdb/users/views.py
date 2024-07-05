@@ -1,42 +1,50 @@
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.response import Response
+from rest_framework import viewsets, status
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from .serializers import SignupSerializer, TokenSerializer
+from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated
+from .serializers import SignUpSerializer, UserSerializer, TokenSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
 
-class SignupView(APIView):
+class SignUpView(APIView):
     def post(self, request):
-        serializer = SignupSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user, created = User.objects.get_or_create(
-            email=serializer.validated_data['email'],
-            username=serializer.validated_data['username']
-        )
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            'Confirmation code',
-            f'Your confirmation code is {confirmation_code}',
-            'from@example.com',
-            [user.email],
-            fail_silently=False,
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = SignUpSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TokenView(APIView):
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(User, username=serializer.validated_data['username'])
-        if default_token_generator.check_token(user, serializer.validated_data['confirmation_code']):
-            refresh = RefreshToken.for_user(user)
-            return Response({'token': str(refresh.access_token)}, status=status.HTTP_200_OK)
-        return Response({'confirmation_code': 'Invalid confirmation code'}, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            confirmation_code = serializer.validated_data['confirmation_code']
+            user = User.objects.filter(username=username).first()
+            if user and user.check_password(confirmation_code):
+                refresh = RefreshToken.for_user(user)
+                return Response({'token': str(refresh.access_token)}, status=status.HTTP_200_OK)
+            return Response({'detail': 'Invalid username or confirmation code.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ['list', 'create', 'destroy']:
+            self.permission_classes = [IsAdminUser]
+        elif self.action in ['retrieve', 'update', 'partial_update']:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
+
+    def get_object(self):
+        if self.kwargs.get('username') == 'me':
+            return self.request.user
+        return super().get_object()
