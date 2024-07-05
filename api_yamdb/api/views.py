@@ -37,7 +37,10 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     model = Comment
     serializer_class = CommentSerializer
-    permission_classes = (IsAdminOrModeratorOrAuthor,)
+    permission_classes = (
+        IsAdminOrModeratorOrAuthor,
+        IsAuthenticatedOrReadOnly
+    )
     pagination_class = PageNumberPagination
 
     def get_review(self):
@@ -55,7 +58,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAdminOrModeratorOrAuthor,)
+    permission_classes = (
+        IsAdminOrModeratorOrAuthor,
+        IsAuthenticatedOrReadOnly
+    )
     pagination_class = PageNumberPagination
 
     def get_title(self):
