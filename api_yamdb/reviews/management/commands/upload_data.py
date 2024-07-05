@@ -12,7 +12,7 @@ class Command(BaseCommand):
     data = {
         'category': Category,
         'comments': Comment,
-        'genre_title': Genre_Title,
+        'genre_title': Title,
         'genre': Genre,
         'review': Review,
         'titles': Title,
@@ -48,14 +48,17 @@ class Command(BaseCommand):
                     sys.exit()
                 with file_csv:
                     reader = csv.DictReader(file_csv)
-                    for row in reader:
-                        model.objects.create(**row)
+                    model.objects.bulk_create([model(**row) for row in reader])
                     self.stdout.write(
                         self.style.SUCCESS(
                             f'Данные из файла {file_name}.csv внесены в базу'
                         )
                     )
         except DatabaseError as error:
-            self.stdout.write(self.style.ERROR(f'Ошибка базы данных {error}'))
+            self.stdout.write(self.style.ERROR(f'Ошибка базы данных: {error}'))
+        except csv.Error as error:
+            sys.exit(
+                'file {}, line {}: {}'.format(file_csv, reader.line_num, error)
+            )
         except Exception as error:
             self.stdout.write(self.style.ERROR(error))

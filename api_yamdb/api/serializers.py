@@ -1,9 +1,16 @@
+import datetime
+
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
+THIS_YEAR = datetime.datetime.now().year
+
+
 class CategorySerializer(serializers.ModelSerializer):
+
+    year = serializers.IntegerField(max_value=THIS_YEAR)
 
     class Meta:
         model = Category
