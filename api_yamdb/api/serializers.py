@@ -25,24 +25,25 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = SlugRelatedField(slug_field='username', read_only=True)
-    title = serializers.SlugRelatedField(
-        slug_field='name',
-        read_only=True,
+    author = SlugRelatedField(
+        slug_field='username',
+        read_only=True
     )
 
     class Meta:
         model = Review
-        fields = '__all__'
-        read_only_fields = ('author', 'title')
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        read_only_fields = ('author',)
 
     def validate(self, data):
+        title_id = self.context['title_id']
+
         if self.context['request'].method == 'POST' and Review.objects.filter(
-            title=self.context['title_id'],
-            author=self.context['request'].user
+            title_id=title_id, author=self.context['request'].user
         ).exists():
             raise serializers.ValidationError(
-                'Ранее вы уже оставляли отзыв на это произведение')
+                "Ранее Вы уже оставляли отзыв на данное произведение"
+            )
         return data
 
 
