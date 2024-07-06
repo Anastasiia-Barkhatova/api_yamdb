@@ -11,11 +11,11 @@ class Command(BaseCommand):
     help = 'Залить данные из файлов csv в базу данных'
     data = {
         'category': Category,
-        'comments': Comment,
-        'genre_title': Title,
         'genre': Genre,
-        'review': Review,
         'titles': Title,
+        'review': Review,
+        'comments': Comment,
+        # 'genre_title': Title,
         'users': Genre,
     }
 
@@ -58,7 +58,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f'Ошибка базы данных: {error}'))
         except csv.Error as error:
             sys.exit(
-                'file {}, line {}: {}'.format(file_csv, reader.line_num, error)
+                f'file {file_csv}, line {reader}: {reader.line_num} , {error}'
             )
         except Exception as error:
             self.stdout.write(self.style.ERROR(error))
