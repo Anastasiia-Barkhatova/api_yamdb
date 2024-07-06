@@ -7,3 +7,6 @@ disable = missing-function-docstring,
         line-too-long,
         invalid-str-returned,
         no-member,
+        unsubscriptable-object,
+        arguments-renamed,
+        unused-argument
