@@ -7,7 +7,7 @@ from reviews.models import Category, Comment, Genre, Review, Title
 
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, TitleSerializer)
-from .permission import IsAdminOrReadOnly
+from .permission import IsAdminOrReadOnly, IsAdminOrModeratorOrAuthor
 
 
 class CategoryViewSet(mixins.CreateModelMixin,
@@ -37,7 +37,10 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     model = Comment
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        IsAdminOrModeratorOrAuthor,
+        IsAuthenticatedOrReadOnly
+    )
     pagination_class = PageNumberPagination
 
     def get_review(self):
@@ -55,7 +58,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        IsAdminOrModeratorOrAuthor,
+        IsAuthenticatedOrReadOnly
+    )
     pagination_class = PageNumberPagination
 
     def get_title(self):
@@ -69,3 +75,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title=self.get_title()
         )
+
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+            'title_id': self.kwargs.get('title_id')
+        }
