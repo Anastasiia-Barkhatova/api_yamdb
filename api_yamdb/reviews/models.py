@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from reviews.constants import NAME_LENGHT, SLUG_LENGHT, THIS_YEAR
+
 User = get_user_model()
 
 TEXT_LENGTH = 25
@@ -10,11 +12,11 @@ TEXT_LENGTH = 25
 class Category(models.Model):
     name = models.CharField(
         verbose_name='Заголовок',
-        max_length=256
+        max_length=NAME_LENGHT
     )
     slug = models.SlugField(
         verbose_name='Slug категории',
-        max_length=50,
+        max_length=SLUG_LENGHT,
         unique=True
     )
 
@@ -29,11 +31,11 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField(
         verbose_name='Жанр',
-        max_length=256
+        max_length=NAME_LENGHT
     )
     slug = models.SlugField(
         verbose_name='Slug жанра',
-        max_length=50,
+        max_length=SLUG_LENGHT,
         unique=True
     )
 
@@ -48,9 +50,10 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(
         verbose_name='Произведение',
-        max_length=256,
+        max_length=NAME_LENGHT,
     )
     year = models.SmallIntegerField(
+        validators=[MaxValueValidator(THIS_YEAR)],
         verbose_name='Год выпуска',
         db_index=True
     )

@@ -3,6 +3,7 @@ import datetime
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
+from reviews.constants import THIS_YEAR
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -26,6 +27,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+
+    year = serializers.IntegerField(max_value=THIS_YEAR)
 
     class Meta:
         model = Title
