@@ -2,24 +2,26 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils.crypto import get_random_string
+import re
 
 User = get_user_model()
-
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'bio', 'role', 'first_name', 'last_name')
 
-
 class SignUpSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.EmailField(max_length=254)
     username = serializers.CharField(max_length=150)
 
-    def validate(self, data):
-        if data['username'].lower() == 'me':
+    def validate_username(self, value):
+        if value.lower() == 'me':
             raise serializers.ValidationError("Использовать имя 'me' в качестве username запрещено.")
-        return data
+        if not re.match(r'^[\w.@+-]+\Z', value):
+            raise serializers.ValidationError("Содержание поля username не соответствует паттерну.")
+        return value
 
     def create(self, validated_data):
         user, created = User.objects.get_or_create(
@@ -27,7 +29,7 @@ class SignUpSerializer(serializers.Serializer):
             defaults={'username': validated_data['username']}
         )
         if created:
-            confirmation_code = user.make_random_password()
+            confirmation_code = get_random_string()
             user.set_password(confirmation_code)
             user.save()
             send_mail(
@@ -38,7 +40,6 @@ class SignUpSerializer(serializers.Serializer):
                 fail_silently=False,
             )
         return user
-
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
