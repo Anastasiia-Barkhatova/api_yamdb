@@ -1,7 +1,20 @@
 from django.contrib import admin
 
 from .models import Category, Comment, Genre, Review, Title
+from users.models import User
 
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = (
+        'username',   
+        'email',
+        'bio',
+        'role',
+    )
+    list_editable = (
+        'role',
+        'email'
+    )
 
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
