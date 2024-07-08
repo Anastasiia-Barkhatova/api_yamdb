@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
+
+from users.permissions import IsAdminUser
 from .serializers import SignUpSerializer, UserSerializer, TokenSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
