@@ -30,7 +30,12 @@ class CategoryViewSet(
     pagination_class = PageNumberPagination
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAuthenticatedOrAdminOrReadOnly,)

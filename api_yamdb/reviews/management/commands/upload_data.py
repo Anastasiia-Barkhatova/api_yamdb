@@ -1,4 +1,5 @@
 import csv
+import inspect
 import sys
 
 from django.core.management.base import BaseCommand
@@ -36,6 +37,9 @@ class Command(BaseCommand):
             if file_name != 'all':
                 self.data = {file_name: self.data[file_name]}
             for file_name, model in self.data.items():
+                fields = model._meta.get_fields()
+                for field in fields:
+                    print(field)
                 try:
                     file_csv = open(
                         f'static/data/{file_name}.csv', encoding='UTF-8'
@@ -49,6 +53,7 @@ class Command(BaseCommand):
                     sys.exit()
                 with file_csv:
                     reader = csv.DictReader(file_csv)
+                    print([model(**row).__dict__ for row in reader])
                     model.objects.bulk_create([model(**row) for row in reader])
                     self.stdout.write(
                         self.style.SUCCESS(
