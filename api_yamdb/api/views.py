@@ -52,6 +52,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
     )
     pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post', 'patch']
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
@@ -70,6 +71,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
     )
     pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post', 'patch']
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
