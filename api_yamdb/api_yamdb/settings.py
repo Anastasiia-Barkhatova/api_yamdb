@@ -2,6 +2,8 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config  # Для работы с переменными окружения
 
+from reviews.constants import PAGINATION_PAGE_SIZE
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs')  # Переменные окружения
@@ -102,6 +104,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': PAGINATION_PAGE_SIZE,
 }
 
 # JWT settings

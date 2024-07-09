@@ -1,5 +1,6 @@
 import csv
 import sys
+import sqlite3
 
 from django.core.management.base import BaseCommand
 from django.db import DatabaseError
@@ -20,6 +21,10 @@ class Command(BaseCommand):
         # 'genre_title': Title,
     }
 
+    def column_validation(self, file_name, model):
+
+        pass
+
     def add_arguments(self, parser):
         parser.add_argument(
             'file_name',
@@ -27,7 +32,7 @@ class Command(BaseCommand):
             help=(
                 'Укажите имя файла который необходимо загрузить в базу.'
                 'Для загрузки всех файлов из директории, укажите - "all"'
-            )
+            ),
         )
 
     def handle(self, *args, **options):
@@ -40,6 +45,19 @@ class Command(BaseCommand):
                     file_csv = open(
                         f'static/data/{file_name}.csv', encoding='UTF-8'
                     )
+                    print(file_csv.readline())
+                    file_csv.seek(0)
+
+                    connection = sqlite3.connect('db.sqlite3')
+                    cursor = connection.execute(f'select * from reviews_{file_name}')
+                    names = [description[0] for description in cursor.description]
+                    print(names)
+
+                    #conn = sqlite3.connect('db.sqlite3')
+                    #c = conn.cursor()
+                    #c.execute(f'select * from reviews_{file_name}')
+                    #print([member[0] for member in c.description])
+
                 except OSError:
                     self.stdout.write(
                         self.style.ERROR(
