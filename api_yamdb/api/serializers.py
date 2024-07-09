@@ -1,5 +1,3 @@
-import datetime
-
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
@@ -7,12 +5,7 @@ from reviews.constants import THIS_YEAR
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
-THIS_YEAR = datetime.datetime.now().year
-
-
 class CategorySerializer(serializers.ModelSerializer):
-
-    year = serializers.IntegerField(max_value=THIS_YEAR)
 
     class Meta:
         model = Category
@@ -27,7 +20,6 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-
     year = serializers.IntegerField(max_value=THIS_YEAR)
 
     class Meta:
@@ -53,7 +45,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             title_id=title_id, author=self.context['request'].user
         ).exists():
             raise serializers.ValidationError(
-                "Ранее Вы уже оставляли отзыв на данное произведение"
+                "Ранее вы уже оставляли отзыв на данное произведение"
             )
         return data
 

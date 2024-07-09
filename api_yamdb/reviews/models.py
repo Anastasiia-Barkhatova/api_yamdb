@@ -2,11 +2,9 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from reviews.constants import NAME_LENGHT, SLUG_LENGHT, THIS_YEAR
+from reviews.constants import NAME_LENGHT, SLUG_LENGHT, TEXT_LENGTH, THIS_YEAR
 
 User = get_user_model()
-
-TEXT_LENGTH = 25
 
 
 class Category(models.Model):

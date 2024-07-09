@@ -23,7 +23,7 @@ cd api_yamdb
 Cоздать и активировать виртуальное окружение:
 
 ```bash
-python -m venv env
+python -m venv venv
 ```
 
 ```bash
@@ -42,7 +42,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Перейти в репозиторий yatube_api
+Перейти в репозиторий api_yamdb
 
 ```bash
 cd api_yamdb

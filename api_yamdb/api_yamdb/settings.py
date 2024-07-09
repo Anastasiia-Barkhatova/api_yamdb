@@ -123,16 +123,5 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 }
 
-# Email settings (для отправки кодов подтверждения)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Для тестирования, измените на SMTP в продакшене??
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.example.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='your-email@example.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='your-email-password')
 
-# Комментарии к изменениям:
-# 1. Добавлено приложение 'users' в INSTALLED_APPS.
-# 2. Указана кастомная модель пользователя 'users.User' в AUTH_USER_MODEL.
-# 3. Настройки для работы с JWT-токенами в SIMPLE_JWT.
-# 4. Настройки для отправки email (EMAIL_BACKEND установлен на 'console' для тестирования).
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
