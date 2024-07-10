@@ -8,7 +8,7 @@ from users.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
-from .permissions import IsAdminUser, IsModeratorUser, IsAuthorOrReadOnly
+from .permissions import IsAdminUser, IsSelf, IsModeratorUser, IsAuthorOrReadOnly
 from .serializers import SignUpSerializer, UserSerializer, TokenSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import ValidationError
@@ -73,15 +73,23 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = UserPagination
     lookup_field = 'username'
     filter_backends = [filters.SearchFilter]
-    search_fields = ['username', 'email']  # Добавьте поля, по которым будет производиться поиск
+    search_fields = ['username', 'email']
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_permissions(self):
         if self.action in ['list', 'create', 'destroy']:
             self.permission_classes = [IsAdminUser]
         elif self.action in ['retrieve', 'update', 'partial_update']:
+            if self.kwargs.get('username') == 'me':
+                self.permission_classes = [IsAuthenticated]
+            else:
+                self.permission_classes = [IsAdminUser, IsSelf]
+        elif self.action == 'delete' and self.kwargs.get('username') == 'me':
+            self.permission_classes = [IsAuthenticated]
+        else:
             self.permission_classes = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]
+
 
     def get_object(self):
         username = self.kwargs.get('username')
