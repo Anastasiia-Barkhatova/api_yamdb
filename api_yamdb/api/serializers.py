@@ -2,6 +2,7 @@ from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
+from reviews.constants import NAME_LENGHT
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -20,10 +21,12 @@ class GenreSerializer(serializers.ModelSerializer):
         exclude = ('id',)
 
 
-class TitleSerializerList(serializers.ModelSerializer):
-    genres = GenreSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True)
+class TitleReadSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=NAME_LENGHT)
+    genres = GenreSerializer(many=True)
+    category = CategorySerializer()
     rating = serializers.SerializerMethodField()
+    # rating = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -40,10 +43,10 @@ class TitleSerializerList(serializers.ModelSerializer):
     def get_rating(self, obj):
         reviews = Review.objects.filter(title=obj)
         rating = reviews.aggregate(Avg('score'))['score__avg']
-        return rating if rating else None
+        return rating
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class TitleWriteSerializer(serializers.ModelSerializer):
     genres = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
@@ -60,7 +63,7 @@ class TitleSerializer(serializers.ModelSerializer):
             'name', 'year', 'description', 'genres', 'category')
 
     def to_representation(self, title):
-        serializer = TitleSerializerList(title)
+        serializer = TitleReadSerializer(title)
         return serializer.data
 
 

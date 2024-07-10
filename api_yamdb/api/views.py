@@ -1,6 +1,8 @@
+from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
+from rest_framework import permissions
 from rest_framework import filters, mixins, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -11,11 +13,12 @@ from .serializers import (
     CommentSerializer,
     GenreSerializer,
     ReviewSerializer,
-    TitleSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer,
 )
 from .permission import (
     IsAdminOrModeratorOrAuthor,
-    IsAuthenticatedOrAdminOrReadOnly,
+    IsAuthenticatedAdminOrReadOnly,
 )
 
 
@@ -27,7 +30,7 @@ class CategoryViewSet(
 ):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticatedOrAdminOrReadOnly,)
+    permission_classes = (IsAuthenticatedAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     pagination_class = PageNumberPagination
     filterset_fields = ('name',)
@@ -44,7 +47,7 @@ class GenreViewSet(
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    permission_classes = (IsAuthenticatedOrAdminOrReadOnly,)
+    permission_classes = (IsAuthenticatedAdminOrReadOnly,)
     pagination_class = PageNumberPagination
     filterset_fields = ('name',)
     search_fields = ('name',)
@@ -53,10 +56,18 @@ class GenreViewSet(
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
-    permission_classes = (IsAuthenticatedOrAdminOrReadOnly,)
+    # queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+    permission_classes = (IsAuthenticatedAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     pagination_class = PageNumberPagination
+    filterset_fields = ('name',)
+    search_fields = ('name',)
     http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_serializer_class(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return TitleReadSerializer
+        return TitleWriteSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):

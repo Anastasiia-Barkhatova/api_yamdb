@@ -21,7 +21,6 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
-        ordering = ('-name',)
 
     def __str__(self):
         return self.name
@@ -76,6 +75,7 @@ class Title(models.Model):
     class Meta:
         verbose_name = 'произведение'
         verbose_name_plural = 'произведения'
+        ordering = ('id',)
 
     def __str__(self):
         return self.name
@@ -95,8 +95,9 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Произведение',
     )
-    score = models.PositiveBigIntegerField(
+    score = models.SmallIntegerField(
         'Оценка',
+        null=True,
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10)
