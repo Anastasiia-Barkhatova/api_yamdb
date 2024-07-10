@@ -42,6 +42,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -51,7 +52,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         IsAdminOrModeratorOrAuthor,
         IsAuthenticatedOrReadOnly,
     )
-    pagination_class = PageNumberPagination
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_review(self):
@@ -70,7 +70,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         IsAdminOrModeratorOrAuthor,
         IsAuthenticatedOrReadOnly,
     )
-    pagination_class = PageNumberPagination
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_title(self):
