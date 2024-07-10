@@ -2,6 +2,9 @@ from rest_framework import viewsets, status, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated
+
+from users.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
@@ -62,6 +65,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     filter_backends = [filters.SearchFilter]
     search_fields = ['username', 'email']  # Добавьте поля, по которым будет производиться поиск
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_permissions(self):
         if self.action in ['list', 'create', 'destroy']:

@@ -1,7 +1,7 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
-from reviews.constants import THIS_YEAR
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -9,22 +9,59 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = '__all__'
+        lookup_field = 'slug'
+        exclude = ('id',)
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        exclude = ('id',)
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    year = serializers.IntegerField(max_value=THIS_YEAR)
+class TitleSerializerList(serializers.ModelSerializer):
+    genres = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genres',
+            'category'
+        )
+
+    def get_rating(self, obj):
+        reviews = Review.objects.filter(title=obj)
+        rating = reviews.aggregate(Avg('score'))['score__avg']
+        return rating if rating else None
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    genres = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+
+    class Meta:
+        model = Title
+        fields = (
+            'name', 'year', 'description', 'genres', 'category')
+
+    def to_representation(self, title):
+        serializer = TitleSerializerList(title)
+        return serializer.data
 
 
 class ReviewSerializer(serializers.ModelSerializer):

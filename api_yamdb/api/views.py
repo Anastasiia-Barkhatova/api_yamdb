@@ -1,6 +1,7 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
-from rest_framework import mixins, viewsets
+from rest_framework import filters, mixins, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -27,21 +28,35 @@ class CategoryViewSet(
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAuthenticatedOrAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     pagination_class = PageNumberPagination
+    filterset_fields = ('name',)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     permission_classes = (IsAuthenticatedOrAdminOrReadOnly,)
     pagination_class = PageNumberPagination
+    filterset_fields = ('name',)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrAdminOrReadOnly,)
     pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -51,7 +66,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         IsAdminOrModeratorOrAuthor,
         IsAuthenticatedOrReadOnly,
     )
-    pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
@@ -69,7 +84,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         IsAdminOrModeratorOrAuthor,
         IsAuthenticatedOrReadOnly,
     )
-    pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
