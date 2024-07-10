@@ -1,9 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils.crypto import get_random_string
 
 
 class User(AbstractUser):
-    email = models.EmailField(unique=True)
+    email = models.EmailField(max_length=254, unique=True)
     bio = models.TextField(blank=True, null=True)
     role = models.CharField(
         max_length=20,
@@ -22,3 +23,6 @@ class User(AbstractUser):
     @property
     def is_moderator(self):
         return self.role == 'moderator'
+
+    def make_random_password(self):
+        return get_random_string()
