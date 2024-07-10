@@ -55,10 +55,13 @@ class GenreViewSet(
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    #queryset = Title.objects.all()
-    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+    queryset = Title.objects.all()
+    # queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = (IsAuthenticatedAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     pagination_class = PageNumberPagination
+    filterset_fields = ('name',)
+    search_fields = ('name',)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):

@@ -75,6 +75,7 @@ class Title(models.Model):
     class Meta:
         verbose_name = 'произведение'
         verbose_name_plural = 'произведения'
+        ordering = ('id',)
 
     def __str__(self):
         return self.name
