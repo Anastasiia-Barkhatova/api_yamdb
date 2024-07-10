@@ -32,9 +32,15 @@ class CategoryViewSet(
     pagination_class = PageNumberPagination
     filterset_fields = ('name',)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
@@ -42,6 +48,7 @@ class GenreViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filterset_fields = ('name',)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
