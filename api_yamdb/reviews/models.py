@@ -8,6 +8,7 @@ User = get_user_model()
 
 
 class Category(models.Model):
+    """Модель категорий."""
     name = models.CharField(
         verbose_name='Заголовок',
         max_length=NAME_LENGHT
@@ -27,6 +28,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель жанров."""
     name = models.CharField(
         verbose_name='Жанр',
         max_length=NAME_LENGHT
@@ -46,6 +48,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель произведений."""
     name = models.CharField(
         verbose_name='Произведение',
         max_length=NAME_LENGHT,
@@ -66,7 +69,7 @@ class Title(models.Model):
         related_name='categoryes',
         verbose_name='Категория'
     )
-    genres = models.ManyToManyField(
+    genre = models.ManyToManyField(
         Genre,
         related_name='genres',
         verbose_name='Жанр'

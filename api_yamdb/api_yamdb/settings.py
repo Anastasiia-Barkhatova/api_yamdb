@@ -1,5 +1,6 @@
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
+
 from decouple import config  # Для работы с переменными окружения
 
 PAGINATION_PAGE_SIZE = 5

@@ -1,25 +1,17 @@
-from django.db.models import Avg
-from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import permissions
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reviews.models import Category, Comment, Genre, Review, Title
 
-from .serializers import (
-    CategorySerializer,
-    CommentSerializer,
-    GenreSerializer,
-    ReviewSerializer,
-    TitleReadSerializer,
-    TitleWriteSerializer,
-)
-from .permission import (
-    IsAdminOrModeratorOrAuthor,
-    IsAuthenticatedAdminOrReadOnly,
-)
+from .filter import TitleFilter
+from .permission import (IsAdminOrModeratorOrAuthor,
+                         IsAuthenticatedAdminOrReadOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitleReadSerializer, TitleWriteSerializer)
 
 
 class CategoryViewSet(
@@ -28,6 +20,7 @@ class CategoryViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
+    """Представление для категорий."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAuthenticatedAdminOrReadOnly,)
@@ -44,6 +37,7 @@ class GenreViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
+    """Представление для жанров."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
@@ -55,12 +49,13 @@ class GenreViewSet(
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Представление для произведений."""
     queryset = Title.objects.all()
-    # queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = (IsAuthenticatedAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     pagination_class = PageNumberPagination
-    filterset_fields = ('name',)
+    filterset_fields = ('genre__slug',)
+    filterset_class = TitleFilter
     search_fields = ('name',)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
@@ -68,7 +63,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.request.method in permissions.SAFE_METHODS:
             return TitleReadSerializer
         return TitleWriteSerializer
-
 
 
 class CommentViewSet(viewsets.ModelViewSet):
