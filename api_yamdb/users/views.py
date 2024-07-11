@@ -1,17 +1,19 @@
-from rest_framework import viewsets, status, filters
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+
+from rest_framework import filters, status, viewsets
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.permissions import IsAdminUser
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.shortcuts import get_object_or_404
 from .permissions import IsAdminUser, IsSelf
-from .serializers import SignUpSerializer, UserSerializer, TokenSerializer
-from rest_framework.pagination import PageNumberPagination
+from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
 
 User = get_user_model()
+
 
 class SignUpView(APIView):
     permission_classes = [AllowAny]
@@ -36,6 +38,7 @@ class SignUpView(APIView):
             return Response(user_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class TokenView(APIView):
     permission_classes = [AllowAny]
 
@@ -53,10 +56,12 @@ class TokenView(APIView):
             return Response({'detail': 'Invalid username or confirmation code.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

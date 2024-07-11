@@ -1,4 +1,5 @@
 from django.db.models import Avg
+
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
@@ -7,6 +8,7 @@ from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор категорий."""
 
     class Meta:
         model = Category
@@ -15,6 +17,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор жанров."""
 
     class Meta:
         model = Genre
@@ -22,24 +25,34 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
+    """Сериализатор произведений на чтение."""
     name = serializers.CharField(max_length=NAME_LENGHT)
-    genres = GenreSerializer(many=True)
+    genre = GenreSerializer(many=True)
     category = CategorySerializer()
     rating = serializers.SerializerMethodField()
-    # rating = serializers.IntegerField()
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genre',
+            'category'
+        )
 
     def get_rating(self, obj):
+        """Вычисление рейтинга."""
         reviews = Review.objects.filter(title=obj)
         rating = reviews.aggregate(Avg('score'))['score__avg']
         return round(int(rating)) if rating is not None else None
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
-    genres = serializers.SlugRelatedField(
+    """Сериализатор произведений на запись."""
+    genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
         many=True
@@ -52,7 +65,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-            'name', 'year', 'description', 'genres', 'category')
+            'name', 'year', 'description', 'genre', 'category')
 
     def to_representation(self, title):
         serializer = TitleReadSerializer(title)
@@ -60,6 +73,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор отзывов."""
     author = SlugRelatedField(
         slug_field='username',
         read_only=True
@@ -83,6 +97,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор комментариев."""
     author = SlugRelatedField(
         read_only=True, slug_field='username'
     )

@@ -1,12 +1,13 @@
-from rest_framework import serializers
+import re
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.conf import settings
-from django.utils.crypto import get_random_string
 from django.db.utils import IntegrityError
-from rest_framework.exceptions import ValidationError
+from django.utils.crypto import get_random_string
 
-import re
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 User = get_user_model()
 

@@ -1,12 +1,13 @@
 from django.contrib import admin
 
-from .models import Category, Comment, Genre, Review, Title
 from users.models import User
+from .models import Category, Comment, Genre, Review, Title
+
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
-        'username',   
+        'username',
         'email',
         'bio',
         'role',
@@ -15,6 +16,7 @@ class UserAdmin(admin.ModelAdmin):
         'role',
         'email'
     )
+
 
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
@@ -29,7 +31,7 @@ class TitleAdmin(admin.ModelAdmin):
         'year',
     )
     list_filter = ('category',)
-    filter_horizontal = ('genres',)
+    filter_horizontal = ('genre',)
 
 
 @admin.register(Category)
