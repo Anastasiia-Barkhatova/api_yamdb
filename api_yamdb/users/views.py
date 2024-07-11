@@ -8,7 +8,7 @@ from users.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
-from .permissions import IsAdminUser, IsModeratorUser, IsAuthorOrReadOnly
+from .permissions import IsAdminUser, IsSelf, IsModeratorUser, IsAuthorOrReadOnly
 from .serializers import SignUpSerializer, UserSerializer, TokenSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import ValidationError
@@ -23,6 +23,15 @@ class SignUpView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            username = serializer.validated_data.get('username')
+            if User.objects.filter(
+                email=email
+            ).exists() and not User.objects.filter(username=username).exists():
+                return Response(
+                    {'error': 'Пользователь с таким email уже зарегистрирован'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             user = serializer.save()
             user_data = {
                 'email': user.email,
@@ -64,18 +73,37 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = UserPagination
     lookup_field = 'username'
     filter_backends = [filters.SearchFilter]
-    search_fields = ['username', 'email']  # Добавьте поля, по которым будет производиться поиск
+    search_fields = ['username', 'email']
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_permissions(self):
         if self.action in ['list', 'create', 'destroy']:
             self.permission_classes = [IsAdminUser]
         elif self.action in ['retrieve', 'update', 'partial_update']:
+            if self.kwargs.get('username') == 'me':
+                self.permission_classes = [IsAuthenticated]
+            else:
+                self.permission_classes = [IsAdminUser, IsSelf]
+        elif self.action == 'delete' and self.kwargs.get('username') == 'me':
+            self.permission_classes = [IsAuthenticated]
+        else:
             self.permission_classes = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]
+
 
     def get_object(self):
         username = self.kwargs.get('username')
         if username == 'me':
             return self.request.user
         return get_object_or_404(User, username=username)
+
+    def partial_update(self, request, *args, **kwargs):
+        if 'role' in request.data and self.kwargs.get('username') == 'me':
+            return Response(
+                {'error': 'Вы не можете менять роль пользователя'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        elif not request.user.is_admin and request.user.is_authenticated and self.kwargs.get('username') != 'me':
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
+
