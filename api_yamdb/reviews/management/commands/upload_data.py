@@ -17,7 +17,6 @@ class Command(BaseCommand):
         'users': User,
         'review': Review,
         'comments': Comment,
-        # 'genre_title': Title,
     }
 
     def add_arguments(self, parser):
@@ -36,18 +35,9 @@ class Command(BaseCommand):
             if file_name != 'all':
                 self.data = {file_name: self.data[file_name]}
             for file_name, model in self.data.items():
-                try:
-                    file_csv = open(
-                        f'static/data/{file_name}.csv', encoding='UTF-8'
-                    )
-                except OSError:
-                    self.stdout.write(
-                        self.style.ERROR(
-                            'Could not open/read file:', file_name
-                        )
-                    )
-                    sys.exit()
-                with file_csv:
+                with open(
+                    f'static/data/{file_name}.csv', encoding='UTF-8'
+                ) as file_csv:
                     reader = csv.DictReader(file_csv)
                     model.objects.bulk_create([model(**row) for row in reader])
                     self.stdout.write(
@@ -55,11 +45,21 @@ class Command(BaseCommand):
                             f'Данные из файла {file_name}.csv внесены в базу'
                         )
                     )
+        except OSError:
+            self.stdout.write(
+                self.style.ERROR('Could not open/read file:', file_name)
+            )
+            sys.exit()
         except DatabaseError as error:
-            self.stdout.write(self.style.ERROR(f'Ошибка базы данных: {error}'))
+            self.stdout.write(
+                self.style.ERROR(
+                    f'Ошибка базы данных: {error}, file_name:{file_name}')
+            )
         except csv.Error as error:
             sys.exit(
                 f'file {file_csv}, line {reader}: {reader.line_num} , {error}'
             )
         except Exception as error:
-            self.stdout.write(self.style.ERROR(error))
+            self.stdout.write(
+                self.style.ERROR(f'Ошибка: {error}, file_name:{file_name}')
+            )

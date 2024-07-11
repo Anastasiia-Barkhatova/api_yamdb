@@ -8,6 +8,8 @@ User = get_user_model()
 
 
 class Category(models.Model):
+    """Модель категорий."""
+
     name = models.CharField(
         verbose_name='Заголовок',
         max_length=NAME_LENGHT
@@ -27,6 +29,8 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель жанров."""
+
     name = models.CharField(
         verbose_name='Жанр',
         max_length=NAME_LENGHT
@@ -46,6 +50,8 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель произведений."""
+
     name = models.CharField(
         verbose_name='Произведение',
         max_length=NAME_LENGHT,
@@ -66,7 +72,7 @@ class Title(models.Model):
         related_name='categoryes',
         verbose_name='Категория'
     )
-    genres = models.ManyToManyField(
+    genre = models.ManyToManyField(
         Genre,
         related_name='genres',
         verbose_name='Жанр'
@@ -75,12 +81,15 @@ class Title(models.Model):
     class Meta:
         verbose_name = 'произведение'
         verbose_name_plural = 'произведения'
+        ordering = ('id',)
 
     def __str__(self):
         return self.name
 
 
 class Review(models.Model):
+    """Модель отзывов."""
+
     text = models.TextField('Текст')
     author = models.ForeignKey(
         User,
@@ -94,8 +103,9 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Произведение',
     )
-    score = models.PositiveBigIntegerField(
+    score = models.SmallIntegerField(
         'Оценка',
+        null=True,
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10)
@@ -123,6 +133,8 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель комментариев."""
+
     text = models.TextField('Текст')
     author = models.ForeignKey(
         User,

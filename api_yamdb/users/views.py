@@ -1,61 +1,133 @@
-from rest_framework import viewsets, status
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken
-from .permissions import IsAdminUser, IsModeratorUser, IsAuthorOrReadOnly
-from .serializers import SignUpSerializer, UserSerializer, TokenSerializer
+from django.shortcuts import get_object_or_404
+from rest_framework import filters, status, viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from users.permissions import IsAdminUser
+from .permissions import IsAdminUser, IsSelf
+from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
+from reviews.constants import PAGE_SIZE, PAGE_SIZE_QUERY_PARAM, MAX_PAGE_SIZE
 
 User = get_user_model()
 
-class SignUpView(APIView):
-    permission_classes = []  # Отключаем требование аутентификации для регистрации
 
-    def post(self, request):
+class SignUpView(APIView):
+    """Представление для регистрации пользователя."""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        """Создание нового пользователя."""
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            email = serializer.validated_data.get('email')
+            username = serializer.validated_data.get('username')
+            if (User.objects.filter(email=email).exists()
+                    and not User.objects.filter(username=username).exists()):
+                return Response(
+                    {'error':
+                     'Пользователь с таким email уже зарегистрирован'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user = serializer.save()
+            user_data = {
+                'email': user.email,
+                'username': user.username
+            }
+            return Response(user_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class TokenView(APIView):
-    permission_classes = []  # Отключаем требование аутентификации для получения токена
+    """Представление для генерации токена для пользователей."""
+
+    permission_classes = [AllowAny]
 
     def post(self, request):
+        """Создание токена для пользователя."""
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
             confirmation_code = serializer.validated_data['confirmation_code']
-            user = User.objects.filter(username=username).first()
+
+            user = get_object_or_404(User, username=username)
+
             if user and user.check_password(confirmation_code):
                 refresh = RefreshToken.for_user(user)
-                return Response({'token': str(refresh.access_token)}, status=status.HTTP_200_OK)
-            return Response({'detail': 'Invalid username or confirmation code.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'token': str(refresh.access_token)},
+                                status=status.HTTP_200_OK)
+            return Response({'detail':
+                            'Invalid username or confirmation code.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 100
+    """Класс пагинации для UserViewSet."""
+
+    page_size = PAGE_SIZE
+    page_size_query_param = PAGE_SIZE_QUERY_PARAM
+    max_page_size = MAX_PAGE_SIZE
+
 
 class UserViewSet(viewsets.ModelViewSet):
+    """ViewSet для управления пользователями."""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = UserPagination
+    lookup_field = 'username'
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username', 'email']
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_permissions(self):
-        if self.action in ['list', 'create', 'destroy']:
+        """Получение разрешений для действий."""
+        if self.action in ['list', 'create']:
             self.permission_classes = [IsAdminUser]
+        elif self.action == 'destroy':
+            if self.kwargs.get('username') == 'me':
+                self.permission_classes = [IsAuthenticated]
+            else:
+                self.permission_classes = [IsAdminUser]
         elif self.action in ['retrieve', 'update', 'partial_update']:
+            if self.kwargs.get('username') == 'me':
+                self.permission_classes = [IsAuthenticated]
+            else:
+                self.permission_classes = [IsAdminUser, IsSelf]
+        else:
             self.permission_classes = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]
 
     def get_object(self):
+        """Получение объекта пользователя."""
         username = self.kwargs.get('username')
         if username == 'me':
             return self.request.user
-        if not username:
-            raise User.DoesNotExist("User matching query does not exist.")
-        return User.objects.get(username=username)
+        return get_object_or_404(User, username=username)
+
+    def destroy(self, request, *args, **kwargs):
+        """Удаление пользователя, если это не /me."""
+        if self.kwargs.get('username') == 'me':
+            return Response(
+                {'error': 'DELETE запрос на /me не разрешен'},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        return super().destroy(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Частичное обновление пользователя."""
+        if 'role' in request.data and self.kwargs.get('username') == 'me':
+            return Response(
+                {'error': 'Вы не можете менять роль пользователя'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        elif (not request.user.is_admin
+              and request.user.is_authenticated
+              and self.kwargs.get('username') != 'me'):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
