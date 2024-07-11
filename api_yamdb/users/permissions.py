@@ -26,3 +26,8 @@ class IsAdminOrSelf(permissions.BasePermission):
             return request.user.is_authenticated
         # Запретить все изменения, кроме администраторов и владельцев профиля
         return request.user.is_authenticated and (request.user.is_admin or request.user.username == view.kwargs.get('username'))
+
+
+class IsSelf(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj == request.user

@@ -30,20 +30,12 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = (
-            'id',
-            'name',
-            'year',
-            'rating',
-            'description',
-            'genres',
-            'category'
-        )
+        fields = '__all__'
 
     def get_rating(self, obj):
         reviews = Review.objects.filter(title=obj)
         rating = reviews.aggregate(Avg('score'))['score__avg']
-        return rating
+        return round(int(rating)) if rating is not None else None
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
