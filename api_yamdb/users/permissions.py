@@ -6,8 +6,7 @@ class IsAdminUser(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """
-        Проверка, что пользователь аутентифицирован.
-
+        Проверка, что пользователь аутентифицирован
         и является администратором.
         """
         return request.user.is_authenticated and request.user.is_admin
@@ -18,25 +17,19 @@ class IsModeratorUser(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """
-        Проверка, что пользователь аутентифицирован.
-
+        Проверка, что пользователь аутентифицирован
         и является модератором.
         """
         return request.user.is_authenticated and request.user.is_moderator
 
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
-    """
-    Разрешение для автора объекта.
-
-    или только чтение для других.
-    """
+    """Разрешение для автора объекта или только чтение для других."""
 
     def has_permission(self, request, view):
         """
-        Разрешение на чтение для всех.
-
-        на изменение только для аутентифицированных пользователей.
+        Разрешение на чтение для всех на изменение только
+        для аутентифицированных пользователей.
         """
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -44,9 +37,8 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         """
-        Разрешение на чтение для всех.
-
-        на изменение только для автора, модератора или администратора.
+        Разрешение на чтение для всех на изменение
+        только для автора, модератора или администратора.
         """
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -62,8 +54,7 @@ class IsAdminOrSelf(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """
-        Разрешение на чтение для аутентифицированных пользователей.
-
+        Разрешение на чтение для аутентифицированных пользователей
         на изменение только для администратора или самого пользователя.
         """
         if request.method in permissions.SAFE_METHODS:

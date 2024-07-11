@@ -1,7 +1,7 @@
 from datetime import timedelta
 from pathlib import Path
 
-from decouple import config  # Для работы с переменными окружения
+from decouple import config
 
 PAGINATION_PAGE_SIZE = 5
 
@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'django_filters',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
-    'users.apps.UsersConfig',  # Добавлено приложение users
+    'users.apps.UsersConfig',
     'rest_framework_simplejwt',
 ]
 
@@ -95,10 +95,8 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
-# Указание кастомной модели пользователя
 AUTH_USER_MODEL = 'users.User'
 
-# REST framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -110,7 +108,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': PAGINATION_PAGE_SIZE,
 }
 
-# JWT settings
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),

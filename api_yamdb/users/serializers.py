@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.db.utils import IntegrityError
 from django.utils.crypto import get_random_string
-
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -50,9 +49,8 @@ class SignUpSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         """
-        Создание нового пользователя.
-
-        и отправка кода подтверждения на email.
+        Создание нового пользователя и отправка кода
+        подтверждения на email.
         """
         try:
             user, created = User.objects.get_or_create(

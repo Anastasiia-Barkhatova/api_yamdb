@@ -1,17 +1,22 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-
 from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from reviews.models import Category, Comment, Genre, Review, Title
 
+from reviews.models import Category, Comment, Genre, Review, Title
 from .filter import TitleFilter
-from .permission import (IsAdminOrModeratorOrAuthor,
-                         IsAuthenticatedAdminOrReadOnly)
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReviewSerializer,
-                          TitleReadSerializer, TitleWriteSerializer)
+from .permission import (
+    IsAdminOrModeratorOrAuthor,
+    IsAuthenticatedAdminOrReadOnly
+)
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer, ReviewSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer
+)
 
 
 class CategoryViewSet(
@@ -21,6 +26,7 @@ class CategoryViewSet(
     viewsets.GenericViewSet,
 ):
     """Представление для категорий."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAuthenticatedAdminOrReadOnly,)
@@ -38,6 +44,7 @@ class GenreViewSet(
     viewsets.GenericViewSet,
 ):
     """Представление для жанров."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
@@ -50,6 +57,7 @@ class GenreViewSet(
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление для произведений."""
+
     queryset = Title.objects.all()
     permission_classes = (IsAuthenticatedAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
@@ -66,6 +74,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Представление для комментариев."""
+
     model = Comment
     serializer_class = CommentSerializer
     permission_classes = (
@@ -85,6 +95,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Представление для отзывов."""
+
     serializer_class = ReviewSerializer
     permission_classes = (
         IsAdminOrModeratorOrAuthor,

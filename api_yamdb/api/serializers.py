@@ -1,5 +1,4 @@
 from django.db.models import Avg
-
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
@@ -26,6 +25,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     """Сериализатор произведений на чтение."""
+
     name = serializers.CharField(max_length=NAME_LENGHT)
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
@@ -52,6 +52,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 class TitleWriteSerializer(serializers.ModelSerializer):
     """Сериализатор произведений на запись."""
+
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
@@ -74,6 +75,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор отзывов."""
+
     author = SlugRelatedField(
         slug_field='username',
         read_only=True
@@ -98,6 +100,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор комментариев."""
+
     author = SlugRelatedField(
         read_only=True, slug_field='username'
     )
