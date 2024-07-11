@@ -9,36 +9,57 @@ from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from reviews.constants import (EMAIL_MAX_LENGTH,
+                               USERNAME_MAX_LENGTH,
+                               CONFIRMATION_CODE_MAX_LENGTH)
+
 User = get_user_model()
 
+
 class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели пользователя."""
+
     class Meta:
         model = User
-        fields = ('username', 'email', 'bio', 'role', 'first_name', 'last_name')
+        fields = (
+            'username', 'email', 'bio', 'role', 'first_name', 'last_name'
+        )
 
 
 class SignUpSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=254)
-    username = serializers.CharField(max_length=150)
+    """Сериализатор для регистрации пользователя."""
+
+    email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
+    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
 
     def validate_username(self, value):
+        """Проверка поля username."""
         if value.lower() == 'me':
-            raise serializers.ValidationError("Использовать имя 'me' в качестве username запрещено.")
+            raise serializers.ValidationError(
+                "Использовать имя 'me' в качестве username запрещено."
+            )
         if not re.match(r'^[\w.@+-]+\Z', value):
-            raise serializers.ValidationError("Содержание поля username не соответствует паттерну.")
+            raise serializers.ValidationError(
+                "Содержание поля username не соответствует паттерну."
+            )
         return value
 
     def validate_email(self, value):
+        """Проверка поля email."""
         return value
 
     def create(self, validated_data):
+        """
+        Создание нового пользователя.
+
+        и отправка кода подтверждения на email.
+        """
         try:
             user, created = User.objects.get_or_create(
                 email=validated_data['email'],
                 defaults={'username': validated_data['username']}
             )
             if not created:
-                # Update the username if the email already exists
                 user.username = validated_data['username']
                 user.save()
 
@@ -56,6 +77,11 @@ class SignUpSerializer(serializers.Serializer):
             raise ValidationError("A user with this username already exists.")
         return user
 
+
 class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
-    confirmation_code = serializers.CharField(max_length=128)
+    """Сериализатор для получения токена пользователя."""
+
+    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
+    confirmation_code = serializers.CharField(
+        max_length=CONFIRMATION_CODE_MAX_LENGTH
+    )
