@@ -70,6 +70,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleWriteSerializer
 
 
+
 class CommentViewSet(viewsets.ModelViewSet):
     model = Comment
     serializer_class = CommentSerializer
