@@ -4,6 +4,7 @@ import sys
 from django.core.management.base import BaseCommand
 from django.db import DatabaseError
 
+from reviews.constants import LOCATION_CSV
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
@@ -21,22 +22,24 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            'file_name',
+            'write',
             type=str,
             help=(
-                'Укажите имя файла который необходимо загрузить в базу.'
-                'Для загрузки всех файлов из директории, укажите - "all"'
+                'Для выборочной загрузки файлов выполните команду: '
+                'python manage.py upload_data write -F <имя_файла>'
             )
         )
+        parser.add_argument('-F', '--file_name',)
 
     def handle(self, *args, **options):
+
         file_name = options['file_name']
         try:
-            if file_name != 'all':
+            if file_name:
                 self.data = {file_name: self.data[file_name]}
             for file_name, model in self.data.items():
                 with open(
-                    f'static/data/{file_name}.csv', encoding='UTF-8'
+                    f'{LOCATION_CSV}{file_name}.csv', encoding='UTF-8'
                 ) as file_csv:
                     reader = csv.DictReader(file_csv)
                     model.objects.bulk_create([model(**row) for row in reader])
