@@ -22,23 +22,13 @@ class SignUpView(APIView):
     def post(self, request, *args, **kwargs):
         """Создание нового пользователя."""
         serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data.get('email')
-            username = serializer.validated_data.get('username')
-            if (User.objects.filter(email=email).exists()
-                    and not User.objects.filter(username=username).exists()):
-                return Response(
-                    {'error':
-                     'Пользователь с таким email уже зарегистрирован'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            user = serializer.save()
-            user_data = {
-                'email': user.email,
-                'username': user.username
-            }
-            return Response(user_data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        user_data = {
+            'email': user.email,
+            'username': user.username
+        }
+        return Response(user_data, status=status.HTTP_200_OK)
 
 
 class TokenView(APIView):
@@ -49,20 +39,18 @@ class TokenView(APIView):
     def post(self, request):
         """Создание токена для пользователя."""
         serializer = TokenSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data['username']
-            confirmation_code = serializer.validated_data['confirmation_code']
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data['username']
+        confirmation_code = serializer.validated_data['confirmation_code']
 
-            user = get_object_or_404(User, username=username)
+        user = get_object_or_404(User, username=username)
 
-            if user and user.check_password(confirmation_code):
-                refresh = RefreshToken.for_user(user)
-                return Response({'token': str(refresh.access_token)},
-                                status=status.HTTP_200_OK)
-            return Response({'detail':
-                            'Invalid username or confirmation code.'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if user.check_password(confirmation_code):
+            refresh = RefreshToken.for_user(user)
+            return Response({'token': str(refresh.access_token)},
+                            status=status.HTTP_200_OK)
+        return Response({'detail': 'Invalid username or confirmation code.'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserPagination(PageNumberPagination):

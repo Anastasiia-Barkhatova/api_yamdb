@@ -2,9 +2,9 @@ import re
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.utils import IntegrityError
-from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -45,6 +45,16 @@ class SignUpSerializer(serializers.Serializer):
             )
         return value
 
+    def validate(self, data):
+        """Дополнительная проверка email и username."""
+        email = data.get('email')
+        username = data.get('username')
+        if (User.objects.filter(email=email).exists()
+                and not User.objects.filter(username=username).exists()):
+            raise serializers.ValidationError(
+                "Пользователь с таким email уже зарегистрирован")
+        return data
+
     def create(self, validated_data):
         """Создание нового юзера и отправка кода подтверждения на email."""
         try:
@@ -55,9 +65,7 @@ class SignUpSerializer(serializers.Serializer):
             if not created:
                 user.username = validated_data['username']
 
-            confirmation_code = get_random_string()
-            user.set_password(confirmation_code)
-            user.save()
+            confirmation_code = default_token_generator.make_token(user)
             send_mail(
                 'Код подтверждения',
                 f'Ваш код подтверждения: {confirmation_code}',
