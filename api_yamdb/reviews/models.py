@@ -100,7 +100,6 @@ class Review(models.Model):
     )
     score = models.SmallIntegerField(
         'Оценка',
-        null=True,
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10)

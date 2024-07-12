@@ -47,7 +47,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
         """Вычисление рейтинга."""
         reviews = Review.objects.filter(title=obj)
         rating = reviews.aggregate(Avg('score'))['score__avg']
-        return round(int(rating)) if rating is not None else None
+        return round(rating) if rating is not None else None
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
