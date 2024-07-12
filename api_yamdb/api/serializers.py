@@ -1,7 +1,7 @@
-from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
+from reviews.validates import validate_year
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -56,6 +56,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all()
     )
+    year = serializers.IntegerField(validators=(validate_year,))
 
     class Meta:
         model = Title
