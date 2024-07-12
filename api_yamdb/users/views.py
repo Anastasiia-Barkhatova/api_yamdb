@@ -7,10 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.permissions import IsAdminUser
-from .permissions import IsAdminUser, IsSelf
-from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
-from reviews.constants import PAGE_SIZE, PAGE_SIZE_QUERY_PARAM, MAX_PAGE_SIZE
+from reviews.constants import MAX_PAGE_SIZE, PAGE_SIZE, PAGE_SIZE_QUERY_PARAM
+from users.permissions import IsAdminUser, IsSelf
+from users.serializers import SignUpSerializer, TokenSerializer, UserSerializer
 
 User = get_user_model()
 
@@ -77,7 +76,7 @@ class UserPagination(PageNumberPagination):
 class UserViewSet(viewsets.ModelViewSet):
     """ViewSet для управления пользователями."""
 
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('username')
     serializer_class = UserSerializer
     pagination_class = UserPagination
     lookup_field = 'username'

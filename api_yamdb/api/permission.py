@@ -1,5 +1,7 @@
 from rest_framework import permissions
 
+from users.models import User
+
 
 class IsAuthenticatedAdminOrReadOnly(permissions.BasePermission):
     """Аутентифицированный администратор или только чтение."""
@@ -11,11 +13,7 @@ class IsAuthenticatedAdminOrReadOnly(permissions.BasePermission):
 
 
 class IsAdminOrModeratorOrAuthor(permissions.BasePermission):
-    """
-    Анонимному пользователю доступны только безопасные запросы.
-    Суперпользователю, аутентифицированным пользователям с ролью admin
-    или moderator и автору объекта доступны PATCH и DELETE-запросы.
-    """
+    """Для автора, модератора и админа доступны небезопасные запросы."""
 
     def has_object_permission(self, request, view, obj):
         return (
@@ -23,8 +21,8 @@ class IsAdminOrModeratorOrAuthor(permissions.BasePermission):
             or request.user.is_authenticated
             and (
                 request.user.is_staff
-                or request.user.is_admin
-                or request.user.is_moderator
+                or request.user.role == User.ADMIN
+                or request.user.role == User.MODERATOR
                 or request.user == obj.author
             )
         )

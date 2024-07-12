@@ -1,10 +1,12 @@
 import datetime
 
+MIN_SCORE = 1
+MAX_SCORE = 10
 NAME_LENGHT = 256
+PAGINATION_PAGE_SIZE = 5
 SLUG_LENGHT = 50
 TEXT_LENGTH = 25
 THIS_YEAR = datetime.datetime.now().year
-
 
 # views.py
 PAGE_SIZE = 10
@@ -18,4 +20,3 @@ CONFIRMATION_CODE_MAX_LENGTH = 128
 
 # models.py
 ROLE_MAX_LENGTH = 20
-EMAIL_FIELD_MAX_LENGTH = 254

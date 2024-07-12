@@ -8,9 +8,11 @@ from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from reviews.constants import (EMAIL_MAX_LENGTH,
-                               USERNAME_MAX_LENGTH,
-                               CONFIRMATION_CODE_MAX_LENGTH)
+from reviews.constants import (
+    CONFIRMATION_CODE_MAX_LENGTH,
+    EMAIL_MAX_LENGTH,
+    USERNAME_MAX_LENGTH
+)
 
 User = get_user_model()
 
@@ -33,7 +35,7 @@ class SignUpSerializer(serializers.Serializer):
 
     def validate_username(self, value):
         """Проверка поля username."""
-        if value.lower() == 'me':
+        if value == 'me':
             raise serializers.ValidationError(
                 "Использовать имя 'me' в качестве username запрещено."
             )
@@ -43,15 +45,8 @@ class SignUpSerializer(serializers.Serializer):
             )
         return value
 
-    def validate_email(self, value):
-        """Проверка поля email."""
-        return value
-
     def create(self, validated_data):
-        """
-        Создание нового пользователя и отправка кода
-        подтверждения на email.
-        """
+        """Создание нового юзера и отправка кода подтверждения на email."""
         try:
             user, created = User.objects.get_or_create(
                 email=validated_data['email'],
@@ -59,14 +54,13 @@ class SignUpSerializer(serializers.Serializer):
             )
             if not created:
                 user.username = validated_data['username']
-                user.save()
 
             confirmation_code = get_random_string()
             user.set_password(confirmation_code)
             user.save()
             send_mail(
-                'Confirmation code',
-                f'Your confirmation code is {confirmation_code}',
+                'Код подтверждения',
+                f'Ваш код подтверждения: {confirmation_code}',
                 settings.EMAIL_HOST_USER,
                 [validated_data['email']],
                 fail_silently=False,

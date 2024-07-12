@@ -2,7 +2,6 @@ from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
-from reviews.constants import NAME_LENGHT
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -26,10 +25,9 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleReadSerializer(serializers.ModelSerializer):
     """Сериализатор произведений на чтение."""
 
-    name = serializers.CharField(max_length=NAME_LENGHT)
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True, required=False)
 
     class Meta:
         model = Title
@@ -43,12 +41,6 @@ class TitleReadSerializer(serializers.ModelSerializer):
             'category'
         )
 
-    def get_rating(self, obj):
-        """Вычисление рейтинга."""
-        reviews = Review.objects.filter(title=obj)
-        rating = reviews.aggregate(Avg('score'))['score__avg']
-        return round(int(rating)) if rating is not None else None
-
 
 class TitleWriteSerializer(serializers.ModelSerializer):
     """Сериализатор произведений на запись."""
@@ -56,7 +48,9 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
-        many=True
+        many=True,
+        allow_empty=False,
+        required=True
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
@@ -75,7 +69,6 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор отзывов."""
-
     author = SlugRelatedField(
         slug_field='username',
         read_only=True
@@ -84,11 +77,9 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        read_only_fields = ('author',)
 
     def validate(self, data):
-        title_id = self.context['title_id']
-
+        title_id = self.context.get('view').kwargs.get('title_id')
         if self.context['request'].method == 'POST' and Review.objects.filter(
             title_id=title_id, author=self.context['request'].user
         ).exists():

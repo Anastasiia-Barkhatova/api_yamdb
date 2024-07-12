@@ -60,6 +60,24 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+Заливка данных из файлов .csv в базу данных:
+
+Перейти в репозиторий api_yamdb
+
+```bash
+cd api_yamdb
+```
+Для заливки всех файлов директории \api_yamdb\static\data выполните команду:
+
+```bash
+python manage.py upload_data all
+```
+Для заливки отдельного файла выполните команду:
+
+```bash
+python manage.py upload_data <имя_файла>
+```
+
 ### **Примеры запросов к API:**
 
 * Пример GET-запроса для получения списка всех произведений, к которым пишут отзывы:
@@ -173,26 +191,5 @@ python manage.py runserver
 ```
 
 [Посмотреть примеры других запросов](http://127.0.0.1:8000/redoc/)
-
-
-Заливка данных из файлов .csv в базу данных:
-
-Перейти в репозиторий api_yamdb
-
-```bash
-cd api_yamdb
-```
-Для заливки всех файлов директории \api_yamdb\static\data выполните команду:
-
-```bash
-python manage.py upload_data all
-```
-Для заливки отдельного файла выполните команду:
-
-```bash
-python manage.py upload_data <имя_файла>
-```
-
-
 
 Авторы: [Васин Виктор](https://github.com/BinDigMind), [Караськин Максим](https://github.com/mac7simka), [Бархатова Анастасия](https://github.com/Anastasiia-Barkhatova)

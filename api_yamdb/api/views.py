@@ -1,22 +1,23 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from reviews.models import Category, Comment, Genre, Review, Title
-from .filter import TitleFilter
-from .permission import (
+from api.filter import TitleFilter
+from api.permission import (
     IsAdminOrModeratorOrAuthor,
     IsAuthenticatedAdminOrReadOnly
 )
-from .serializers import (
+from api.serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer, ReviewSerializer,
     TitleReadSerializer,
     TitleWriteSerializer
 )
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CategoryViewSet(
@@ -27,7 +28,7 @@ class CategoryViewSet(
 ):
     """Представление для категорий."""
 
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
     permission_classes = (IsAuthenticatedAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
@@ -45,7 +46,7 @@ class GenreViewSet(
 ):
     """Представление для жанров."""
 
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     permission_classes = (IsAuthenticatedAdminOrReadOnly,)
@@ -58,7 +59,9 @@ class GenreViewSet(
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление для произведений."""
 
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')
+    ).all().order_by('name')
     permission_classes = (IsAuthenticatedAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     pagination_class = PageNumberPagination
@@ -88,7 +91,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
 
     def get_queryset(self):
-        return self.get_review().comments.all()
+        return self.get_review().comments.all().order_by('-pub_date')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self.get_review())
@@ -108,13 +111,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
 
     def get_queryset(self):
-        return self.get_title().reviews.all()
+        return self.get_title().reviews.all().order_by('-pub_date')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.get_title())
-
-    def get_serializer_context(self):
-        return {
-            'request': self.request,
-            'title_id': self.kwargs.get('title_id'),
-        }

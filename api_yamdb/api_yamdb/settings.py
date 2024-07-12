@@ -3,9 +3,7 @@ from pathlib import Path
 
 from decouple import config
 
-PAGINATION_PAGE_SIZE = 5
-
-PAGINATION_PAGE_SIZE = 5
+from reviews.constants import PAGINATION_PAGE_SIZE
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,12 +20,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'django_filters',
-    'api.apps.ApiConfig',
-    'reviews.apps.ReviewsConfig',
-    'users.apps.UsersConfig',
+    'rest_framework',
     'rest_framework_simplejwt',
+    'reviews.apps.ReviewsConfig',
+    'api.apps.ApiConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
