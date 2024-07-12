@@ -60,7 +60,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Заливка данных из файлов .csv в базу данных:
+### **Заливка данных из файлов .csv в базу данных:**
 
 Перейти в репозиторий api_yamdb
 
