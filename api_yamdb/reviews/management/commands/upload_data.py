@@ -25,8 +25,8 @@ class Command(BaseCommand):
             'write',
             type=str,
             help=(
-                'Укажите имя файла который необходимо загрузить в базу.'
-                'Для загрузки всех файлов из директории, укажите - "all"'
+                'Для выборочной загрузки файлов выполните команду: '
+                'python manage.py upload_data write -F <имя_файла>'
             )
         )
         parser.add_argument('-F', '--file_name',)
