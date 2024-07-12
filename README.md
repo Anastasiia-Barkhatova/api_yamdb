@@ -70,12 +70,17 @@ cd api_yamdb
 Для заливки всех файлов директории \api_yamdb\static\data выполните команду:
 
 ```bash
-python manage.py upload_data all
+python manage.py upload_data write
 ```
 Для заливки отдельного файла выполните команду:
 
 ```bash
-python manage.py upload_data <имя_файла>
+python manage.py upload_data write -F <имя_файла>
+```
+или команду:
+
+```bash
+python manage.py upload_data write --file_name <имя_файла>
 ```
 
 ### **Примеры запросов к API:**
@@ -189,32 +194,7 @@ python manage.py upload_data <имя_файла>
     }
   ]
 ```
-
-
-Заливка данных из файлов .csv в базу данных:
-
-Перейти в репозиторий api_yamdb
-
-```bash
-cd api_yamdb
-```
-Для заливки всех файлов директории \api_yamdb\static\data выполните команду:
-
-```bash
-python manage.py upload_data write
-```
-Для заливки отдельного файла выполните команду:
-
-```bash
-python manage.py upload_data write -F <имя_файла>
-```
-или команду:
-
-```bash
-python manage.py upload_data write --file_name <имя_файла>
-```
-
-
 [Посмотреть примеры других запросов](http://127.0.0.1:8000/redoc/)
+
 
 Авторы: [Васин Виктор](https://github.com/BinDigMind), [Караськин Максим](https://github.com/mac7simka), [Бархатова Анастасия](https://github.com/Anastasiia-Barkhatova)
