@@ -17,12 +17,21 @@ class User(AbstractUser):
         (USER, 'Пользователь')
     ]
     email = models.EmailField(max_length=EMAIL_MAX_LENGTH, unique=True)
-    bio = models.TextField(blank=True, null=True)
+    bio = models.TextField("Биография", blank=True, null=True)
     role = models.CharField(
+        "Роль",
         max_length=ROLE_MAX_LENGTH,
         choices=ROLE_CHOICES,
         default=USER
     )
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
+
+    def __str__(self):
+        return self.username
 
     @property
     def is_admin(self):
@@ -37,11 +46,3 @@ class User(AbstractUser):
     def make_random_password(self):
         """Генерирует случайный пароль для пользователя."""
         return get_random_string()
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-        ordering = ('username',)
-
-    def __str__(self):
-        return self.username

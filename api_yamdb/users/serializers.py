@@ -60,10 +60,8 @@ class SignUpSerializer(serializers.Serializer):
         try:
             user, created = User.objects.get_or_create(
                 email=validated_data['email'],
-                defaults={'username': validated_data['username']}
+                username=validated_data['username']
             )
-            if not created:
-                user.username = validated_data['username']
 
             confirmation_code = default_token_generator.make_token(user)
             send_mail(

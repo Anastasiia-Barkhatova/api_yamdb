@@ -2,10 +2,11 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from reviews.validates import validate_year
 from reviews.constants import (
     MAX_SCORE, MIN_SCORE, NAME_LENGHT, TEXT_LENGTH
 )
+from reviews.validates import validate_year
+
 
 User = get_user_model()
 
@@ -27,7 +28,7 @@ class CommonCategoryGenreModel(models.Model):
 class Category(CommonCategoryGenreModel):
     """Модель категорий."""
 
-    class Meta:
+    class Meta(CommonCategoryGenreModel.Meta):
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
 
@@ -35,7 +36,7 @@ class Category(CommonCategoryGenreModel):
 class Genre(CommonCategoryGenreModel):
     """Модель жанров."""
 
-    class Meta:
+    class Meta(CommonCategoryGenreModel.Meta):
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
 
@@ -119,7 +120,7 @@ class Review(CommonReviewCommentModel):
         help_text=f'Установите значение от {MIN_SCORE} до {MAX_SCORE}'
     )
 
-    class Meta:
+    class Meta(CommonReviewCommentModel.Meta):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = [
@@ -140,6 +141,6 @@ class Comment(CommonReviewCommentModel):
         related_name='comments'
     )
 
-    class Meta:
+    class Meta(CommonReviewCommentModel.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'

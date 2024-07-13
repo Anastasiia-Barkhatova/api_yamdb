@@ -22,15 +22,21 @@ class UserAdmin(BaseUserAdmin):
         'email',
         'bio'
     )
+    fieldsets = (
+        ('Регистрационные данные', {
+            'fields': ('username', 'email', 'password', 'date_joined'),
+        }),
+        ('Личная информация', {
+            'fields': ('first_name', 'last_name', 'bio'),
+        }),
+        ('Роли', {
+            'fields': ('role', 'is_active', 'is_staff', 'is_superuser'),
+        }),
+    )
 
 
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
-    def get_genre_list(self, obj):
-        return ', '.join([genre.name for genre in obj.genre.all()])
-
-    get_genre_list.short_description = 'Жанры'
-
     search_fields = ('name',)
     list_display = (
         'name',
@@ -42,6 +48,10 @@ class TitleAdmin(admin.ModelAdmin):
     list_editable = ('year', 'category')
     list_filter = ('category',)
     filter_horizontal = ('genre',)
+
+    @admin.display(description='Жанры')
+    def get_genre_list(self, obj):
+        return ', '.join([genre.name for genre in obj.genre.all()])
 
 
 @admin.register(Category)

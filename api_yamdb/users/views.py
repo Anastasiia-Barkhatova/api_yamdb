@@ -23,12 +23,8 @@ class SignUpView(APIView):
         """Создание нового пользователя."""
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        user_data = {
-            'email': user.email,
-            'username': user.username
-        }
-        return Response(user_data, status=status.HTTP_200_OK)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TokenView(APIView):
