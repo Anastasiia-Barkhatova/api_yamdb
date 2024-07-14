@@ -1,13 +1,9 @@
 import re
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.db.utils import IntegrityError
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-
 from reviews.constants import (
     CONFIRMATION_CODE_MAX_LENGTH,
     EMAIL_MAX_LENGTH,
@@ -49,30 +45,37 @@ class SignUpSerializer(serializers.Serializer):
         """Дополнительная проверка email и username."""
         email = data.get('email')
         username = data.get('username')
-        if (User.objects.filter(email=email).exists()
-                and not User.objects.filter(username=username).exists()):
+
+        if User.objects.filter(email=email, username=username).exists():
+            return data
+
+        if User.objects.filter(email=email).exists():
             raise serializers.ValidationError(
-                "Пользователь с таким email уже зарегистрирован")
+                "Пользователь с таким email уже зарегистрирован"
+            )
+
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(
+                "Пользователь с таким username уже зарегистрирован"
+            )
+
         return data
 
     def create(self, validated_data):
         """Создание нового юзера и отправка кода подтверждения на email."""
-        try:
-            user, created = User.objects.get_or_create(
-                email=validated_data['email'],
-                username=validated_data['username']
-            )
+        user, created = User.objects.get_or_create(
+            email=validated_data['email'],
+            username=validated_data['username']
+        )
 
-            confirmation_code = default_token_generator.make_token(user)
-            send_mail(
-                'Код подтверждения',
-                f'Ваш код подтверждения: {confirmation_code}',
-                settings.EMAIL_HOST_USER,
-                [validated_data['email']],
-                fail_silently=False,
-            )
-        except IntegrityError:
-            raise ValidationError("A user with this username already exists.")
+        confirmation_code = default_token_generator.make_token(user)
+        send_mail(
+            'Код подтверждения',
+            f'Ваш код подтверждения: {confirmation_code}',
+            settings.EMAIL_HOST_USER,
+            [validated_data['email']],
+            fail_silently=False,
+        )
         return user
 
 

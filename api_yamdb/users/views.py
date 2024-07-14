@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from django.contrib.auth.tokens import default_token_generator
 from reviews.constants import MAX_PAGE_SIZE, PAGE_SIZE, PAGE_SIZE_QUERY_PARAM
 from users.permissions import IsAdminUser, IsSelf
 from users.serializers import SignUpSerializer, TokenSerializer, UserSerializer
@@ -41,7 +42,7 @@ class TokenView(APIView):
 
         user = get_object_or_404(User, username=username)
 
-        if user.check_password(confirmation_code):
+        if default_token_generator.check_token(user, confirmation_code):
             refresh = RefreshToken.for_user(user)
             return Response({'token': str(refresh.access_token)},
                             status=status.HTTP_200_OK)
@@ -89,7 +90,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_object(self):
         """Получение объекта пользователя."""
         username = self.kwargs.get('username')
-        if username == 'me':
+        if (username == 'me'):
             return self.request.user
         return get_object_or_404(User, username=username)
 
