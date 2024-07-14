@@ -1,9 +1,11 @@
 import re
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from rest_framework import serializers
+
 from reviews.constants import (
     CONFIRMATION_CODE_MAX_LENGTH,
     EMAIL_MAX_LENGTH,

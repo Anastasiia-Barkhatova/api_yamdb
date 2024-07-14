@@ -1,19 +1,13 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.utils.crypto import get_random_string
-import re
 
-from reviews.constants import EMAIL_MAX_LENGTH, ROLE_MAX_LENGTH
-
-
-def validate_username(value):
-    """Проверяет, имя пользователя."""
-    if not re.match(r'^[\w.@+-]+\Z', value):
-        raise ValidationError(
-            'Имя пользователя содержит недопустимые символы.')
-    if value.lower() == 'me':
-        raise ValidationError('Имя пользователя "me" недопустимо.')
+from reviews.constants import (
+    EMAIL_MAX_LENGTH,
+    ROLE_MAX_LENGTH,
+    USERNAME_MAX_LENGTH
+)
+from users.validators import validate_username
 
 
 class User(AbstractUser):
@@ -38,7 +32,7 @@ class User(AbstractUser):
     )
     username = models.CharField(
         "username",
-        max_length=150,
+        max_length=USERNAME_MAX_LENGTH,
         unique=True,
         validators=[validate_username]
     )
