@@ -28,8 +28,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     rating = serializers.IntegerField(
         read_only=True,
-        required=False,
-        default=None
+        default=0
     )
 
     class Meta:

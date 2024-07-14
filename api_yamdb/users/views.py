@@ -1,14 +1,13 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from django.contrib.auth.tokens import default_token_generator
-from reviews.constants import MAX_PAGE_SIZE, PAGE_SIZE, PAGE_SIZE_QUERY_PARAM
+from users.pagination import UserPagination
 from users.permissions import IsAdminUser, IsSelf
 from users.serializers import SignUpSerializer, TokenSerializer, UserSerializer
 
@@ -48,14 +47,6 @@ class TokenView(APIView):
                             status=status.HTTP_200_OK)
         return Response({'detail': 'Invalid username or confirmation code.'},
                         status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserPagination(PageNumberPagination):
-    """Класс пагинации для UserViewSet."""
-
-    page_size = PAGE_SIZE
-    page_size_query_param = PAGE_SIZE_QUERY_PARAM
-    max_page_size = MAX_PAGE_SIZE
 
 
 class UserViewSet(viewsets.ModelViewSet):
