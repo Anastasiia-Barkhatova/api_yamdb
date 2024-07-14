@@ -31,6 +31,7 @@ class BaseViewSet(
     pagination_class = PageNumberPagination
     filterset_fields = ('name',)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class CategoryViewSet(BaseViewSet):
@@ -38,7 +39,6 @@ class CategoryViewSet(BaseViewSet):
 
     queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
-    lookup_field = 'slug'
 
 
 class GenreViewSet(BaseViewSet):
@@ -46,7 +46,6 @@ class GenreViewSet(BaseViewSet):
 
     queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
-    lookup_field = 'slug'
 
 
 class TitleViewSet(
@@ -62,6 +61,7 @@ class TitleViewSet(
     filterset_fields = ('genre__slug',)
     filterset_class = TitleFilter
     http_method_names = ['get', 'post', 'patch', 'delete']
+    lookup_field = 'pk'
 
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:
