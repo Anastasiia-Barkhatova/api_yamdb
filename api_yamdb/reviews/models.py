@@ -1,11 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
+from reviews.constants import MAX_SCORE, MIN_SCORE, NAME_LENGHT, TEXT_LENGTH
 from reviews.validates import validate_year
-from reviews.constants import (
-    MAX_SCORE, MIN_SCORE, NAME_LENGHT, TEXT_LENGTH
-)
 
 User = get_user_model()
 

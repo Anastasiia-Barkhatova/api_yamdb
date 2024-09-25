@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.crypto import get_random_string
-
 from reviews.constants import EMAIL_MAX_LENGTH, ROLE_MAX_LENGTH
 
 

@@ -3,7 +3,6 @@ import sys
 
 from django.core.management.base import BaseCommand
 from django.db import DatabaseError
-
 from reviews.constants import LOCATION_CSV
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User

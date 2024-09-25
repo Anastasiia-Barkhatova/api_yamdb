@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-
-from reviews.validates import validate_year
 from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.validates import validate_year
 
 
 class CategorySerializer(serializers.ModelSerializer):

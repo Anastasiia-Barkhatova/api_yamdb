@@ -2,7 +2,6 @@ from datetime import timedelta
 from pathlib import Path
 
 from decouple import config
-
 from reviews.constants import PAGINATION_PAGE_SIZE
 
 BASE_DIR = Path(__file__).resolve().parent.parent

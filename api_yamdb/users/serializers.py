@@ -7,12 +7,8 @@ from django.db.utils import IntegrityError
 from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
-from reviews.constants import (
-    CONFIRMATION_CODE_MAX_LENGTH,
-    EMAIL_MAX_LENGTH,
-    USERNAME_MAX_LENGTH
-)
+from reviews.constants import (CONFIRMATION_CODE_MAX_LENGTH, EMAIL_MAX_LENGTH,
+                               USERNAME_MAX_LENGTH)
 
 User = get_user_model()
 
